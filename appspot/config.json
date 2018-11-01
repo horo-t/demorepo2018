@@ -1,0 +1,7 @@
+{
+    "demo_domain": "news.horo.jp",
+    "demo_appspot": "cds2018-sxg.appspot.com",
+    "ec256_key_file": "cert/ec256_20181031.key",
+    "ec256_cert_file": "cert/ec256_20181031.pem",
+    "origin_trial_token": "AjOSuB8Zh9lO4VorOVJu3L/rcdPF+bSiIRnsEfOLWsdpyhaZS31ezBKwOMKa3JqhYkgaTNUdVMK70u3WumgXxAcAAABueyJvcmlnaW4iOiJodHRwczovL2NkczIwMTgtc3hnLmFwcHNwb3QuY29tOjQ0MyIsImZlYXR1cmUiOiJTaWduZWRIVFRQRXhjaGFuZ2VPcmlnaW5UcmlhbCIsImV4cGlyeSI6MTU0NDY3NjIyOH0="
+}

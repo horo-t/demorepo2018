@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+<style type="text/css">
+  body{
+    margin:0;
+    padding:0;
+  }
+  .article {
+    display:  flex;
+    padding: 10px;
+    flex-direction: row;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(230, 236, 240);
+    border-bottom-style: solid;
+  }
+  .user{
+    display: inline-block;
+    padding: 3px;
+  }
+  .user-icon{
+    width: 40px;
+    height: 40px;
+    border-top-left-radius: 100px;
+    border-top-right-radius: 100px;
+    border-bottom-right-radius: 100px;
+    border-bottom-left-radius: 100px;
+    background-size:40px 40px;
+  }
+  .icon-text{
+    position: relative;
+    color: rgb(236, 236, 236);
+    top: 6px;
+    left: 12px;
+    font-size: 26px;
+    font-weight: 800;
+    font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
+  }
+  .message{
+    display: inline-block;
+    padding: 5px;
+    width: 100%
+  }
+  .message-name{
+    font-size: 16px;
+    font-weight: 750;
+  }
+  .message-body {
+    padding: 1px;
+  }
+  .message-image{
+    width: calc(100% - 10px);
+    height: 200px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    background-size: 330px 200px;
+    margin: 5px;
+    background-position-x: 50%;
+    background-position-y: 50%;
+  }
+  .moving-image{
+    position: fixed;
+    display: block;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    background-size: 330px 200px;
+    background-position-x: 50%;
+    background-position-y: 50%;
+  }
+  .articles {
+    opacity: 1.0;
+  }
+  .portal{
+    position: fixed;
+    display: block;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+</style>
+<script>
+(async function(){
+  await new Promise(r => document.addEventListener('DOMContentLoaded',r));
+  const url = 'https://cds2018-sxg.appspot.com/sxg/hayabusa2.sxg';
+  const articles = document.getElementById('articles');
+
+  const a_img = document.getElementById('s-img');
+
+  let t_t = 0;
+  let t_l = 0;
+  let t_w = 330;
+  let t_h = 200;
+  let portal;
+  setTimeout(() => {
+    console.log('loading portal');
+    portal = document.createElement('portal');
+    portal.classList.add('portal');
+    portal.style.opacity = 0;
+    portal.style.zIndex = -1;
+    portal.src = url;
+    portal.addEventListener('load', () => {
+      console.log('portal loaded');
+    });
+    document.body.appendChild(portal);
+    var channel = new MessageChannel();
+    channel.port1.onmessage = (e) => {
+      console.log('send onmessage ' + JSON.stringify(e.data));
+      t_t = e.data.t;
+      t_l = e.data.l;
+      t_w = e.data.w;
+      t_h = e.data.h;
+    };
+    // TODO: onload event handler of portal.
+    setTimeout(() => {
+      console.log('send message');
+      portal.postMessage('', '*', [channel.port2]);
+    }, 1000);
+  }, 2000);
+
+  a_img.addEventListener('click', () => {
+    console.log('click');
+    portal.style.zIndex = 0;
+
+    const moving_img = document.createElement('div');
+    moving_img.classList.add('moving-image');
+    moving_img.style.backgroundImage = a_img.style.backgroundImage;
+
+    moving_img.style.top = a_img.offsetTop - window.pageYOffset + 'px';
+    moving_img.style.left = a_img.offsetLeft + 'px';
+    moving_img.style.width = a_img.offsetWidth + 'px';
+    moving_img.style.height = a_img.offsetHeight + 'px';
+    document.body.appendChild(moving_img);
+    
+    const o_t = a_img.offsetTop - window.pageYOffset ;
+    const o_l = a_img.offsetLeft;
+    const o_w = a_img.offsetWidth;
+    const o_h = a_img.offsetHeight;
+
+    let start = null;
+    const duration = 400;
+    function step(timestamp) {
+      if (!start) start = timestamp;
+      const progress = timestamp - start;
+      const r = Math.min(progress/duration, 1.0);
+      const r2 =  Math.min(r * 3, 1.0);
+      moving_img.style.top = o_t + (t_t - o_t) * r2 + 'px';
+      moving_img.style.left = o_l + (t_l - o_l) * r2 + 'px';
+      moving_img.style.width = o_w + (t_w - o_w) * r2 + 'px';
+      moving_img.style.height = o_h + (t_h - o_h) * r2 + 'px';
+      const radius = (1.0 - r) * 10 + 'px';
+      moving_img.style.borderTopLeftRadius = radius;
+      moving_img.style.borderTopRightRadius = radius;
+      moving_img.style.borderBottomLeftRadius = radius;
+      moving_img.style.borderBottomRightRadius = radius;
+      articles.style.opacity = 1.0 - r;
+      portal.style.opacity = r;
+      console.log('progress' + progress);
+      if (progress < duration) {
+        window.requestAnimationFrame(step);
+      } else {
+        setTimeout(() => {
+          try {
+            portal.activate();
+          } catch(e) {
+            console.log('Failed to activate the portal.');
+            location.href = portal.src;
+          }
+        }, 10);
+      }
+    }
+    window.requestAnimationFrame(step);
+
+  });
+})();
+</script>
+</head>
+<body>
+<div class="articles" id="articles">
+
+  <div class="article">
+    <div class="user"><div class="user-icon" style="background-color: rgb(3, 3, 139);"><div class="icon-text">S</div></div></div>
+    <div class="message">
+      <div class="message-name">
+        Space News
+      </div>
+      <div class="message-body">
+        A very long journey of Hayabusa 2.
+      </div>
+      <div class="message-image" style="background-image: url('https://cdn.glitch.com/21613b27-3e41-47eb-9a48-e8ee706fd9d6%2Fs.jpg?1540970712064');" id="s-img">
+      </div>
+    </div>
+  </div>
+
+  <div class="article">
+    <div class="user"><div class="user-icon" style="background-color: rgb(212, 55, 160);"><div class="icon-text">K</div></div></div>
+    <div class="message">
+      <div class="message-name">
+        Kyoto News
+      </div>
+      <div class="message-body">
+        Cherry blossoms in Kyoto will reach full bloom.
+      </div>
+      <div class="message-image" style="background-image: url('https://cdn.glitch.com/21613b27-3e41-47eb-9a48-e8ee706fd9d6%2Fk.jpg?1540970712146');" id="c-img">
+      </div>
+    </div>
+  </div>
+
+  <div class="article">
+    <div class="user"><div class="user-icon" style="background-color: rgb(66, 0, 41);"><div class="icon-text">T</div></div></div>
+    <div class="message">
+      <div class="message-name">
+        TripHint
+      </div>
+      <div class="message-body">
+        Amazing World Heritage Sites in Kathmandu.
+      </div>
+      <div class="message-image" style="background-image: url('https://cdn.glitch.com/21613b27-3e41-47eb-9a48-e8ee706fd9d6%2Ft.jpg?1540970712225');" id="b-img">
+      </div>
+    </div>
+  </div>
+
+  <div class="article">
+    <div class="user"><div class="user-icon" style="background-color: rgb(11, 65, 75);"><div class="icon-text">P</div></div></div>
+    <div class="message">
+      <div class="message-name">
+        Photoscopia
+      </div>
+      <div class="message-body">
+        "Tokyo by night" exposition at Roppongi Hills from November 1st. until January 10th. Interview with...
+      </div>
+      <div class="message-image" style="background-image: url('https://cdn.glitch.com/21613b27-3e41-47eb-9a48-e8ee706fd9d6%2Fp.jpg?1540970712260');" id="p-img">
+      </div>
+    </div>
+  </div>
+
+  <div class="article">
+    <div class="user"><div class="user-icon" style="background-color: rgb(75, 19, 2);"><div class="icon-text">H</div></div></div>
+    <div class="message">
+      <div class="message-name">
+        Hiking is Life
+      </div>
+      <div class="message-body">
+        Results of the "Best Hiking Destinations" by readers are in. Find out if your...
+      </div>
+      <div class="message-image" style="background-image: url('https://cdn.glitch.com/21613b27-3e41-47eb-9a48-e8ee706fd9d6%2Fh.jpg?1540970711912');" id="h-img">
+      </div>
+    </div>
+  </div>
+</div>
+</body>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+<style type='text/css'>
+  body{
+    margin:0;
+    padding:0;
+    background-color: rgb(22, 22, 34);
+    color: rgb(228, 228, 228);
+  }
+  .header-title1 {
+    font-family: cursive;
+    padding: 13px;
+    font-size: 35px;
+    font-weight: 900;
+    background-color: rgb(3, 3, 139);
+    color: white;
+  }
+  .article {
+    font-family: monospace;
+    padding: 10px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(230, 236, 240);
+    border-bottom-style: solid;
+  }
+  .article-title {
+    padding: 10px;
+    font-size: 28px;
+    font-weight: 800;
+  }
+  .article-image{
+    width: 330px;
+    height: 200px;
+    background-size: 330px 200px;
+    margin: 5px;
+    background-position-x: 50%;
+    background-position-y: 50%;
+  }
+  .article-body {
+    padding: 5px;
+    font-size: 16px;
+  }
+</style>
+<script>
+const loadedPromise = new Promise(r => window.addEventListener('load', r));
+
+window.addEventListener('message', async function(event) {
+  console.log('message');
+  loadedPromise.then(() => {
+    console.log('message loadedPromise done');
+    const top_img = document.getElementById('top-img');
+    const t = top_img.offsetTop - window.pageYOffset ;
+    const l = top_img.offsetLeft;
+    const w = top_img.offsetWidth;
+    const h = top_img.offsetHeight;
+    event.ports[0].postMessage({
+      t: t, l: l, w: w, h: h
+    });
+  })
+}, false);
+</script>
+</head>
+<body>
+  <div class="header">
+      <div class="header-title1">Space News</div>
+  </div>
+  <div class="article">
+    <div class="article-title">A very long journey of Hayabusa 2</div>
+    <div class="article-body">
+      <div class="article-image" style="background-image: url('./hayabusa2.jpg');" id="top-img"></div>
+<div class="article-body">
+Hayabusa 2 is an asteroid explorer developed by the Japan Aerospace Exploration Agency (JAXA) as a successor to the asteroid explorer "Hayabusa" (No. 20 scientific satellite MUSES-C).
+</div>
+<div class="article-body">
+It was launched on H-IIA Launch Vehicle No. 26 from the Tanegashima Space Center large rocket launch site on 3 December 2014.
+</div>
+<div class="article-body">
+Landing and sample return to the Earth's nearby asteroid "1999 JU<sub>3</sub>" are planned.
+</div>
+      </div>
+    </div>
+  </div>
+
+</body>
